@@ -1,1 +1,1 @@
-# AmazonFashionRecommendations
+# RecommendationsGenerator

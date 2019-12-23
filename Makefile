@@ -8,6 +8,6 @@
 #         g++ -c garage.cpp
 
 readDataset: readDataset.cpp
-	g++ -o readDataset readDataset.cpp -lstdc++fs
+	g++ -o readDataset readDataset.cpp -lstdc++fs -ljsoncpp
  clean:
 	rm *.o readDataset

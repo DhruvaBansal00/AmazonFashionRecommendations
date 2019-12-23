@@ -7,7 +7,7 @@
 #  garage.o: garage.cpp garage.hpp
 #         g++ -c garage.cpp
 
-readDataset.o : readDataset.cpp
-	g++ -c readDataset.cpp -lstdc++fs
+readDataset: readDataset.cpp
+	g++ -o readDataset readDataset.cpp -lstdc++fs
  clean:
 	rm *.o readDataset

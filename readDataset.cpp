@@ -5,6 +5,7 @@
 #include <fstream>
 #include <experimental/filesystem>
 
+
 using namespace std;
 namespace fs = experimental::filesystem;
 
@@ -26,7 +27,7 @@ class ReadData {
 
         ReadData();
         void user_ratings(string ratings);
-        
+        void id_stats(string metadata);
 };
 
 
@@ -34,6 +35,7 @@ ReadData::ReadData() {
     string ratings = "../Datasets/Ratings";
     string metadata = "../Datasets/Metadata";
     user_ratings(ratings);
+    id_stats(metadata);
 }
 
 
@@ -54,6 +56,12 @@ void ReadData::user_ratings(string ratings) {
     }
 }
 
+void ReadData::id_stats(string metadata) {
+    for (const auto& entry : fs::directory_iterator(metadata)) {
+        cout << "Starting" << entry.path() << "\n";
+        ifstream infile(entry.path());
+    }
+}
 
 
 

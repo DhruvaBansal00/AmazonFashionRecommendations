@@ -78,11 +78,12 @@ void ReadData::user_ratings(string ratings) {
         cout << "Total number of Users: " << (*user_to_item_rating).size() << "\n";
     }
 }
-
-void print_vec(vector<string> x) {
-    for (string s : x) {
-        cout << s << "\n";
+template <typename T>
+void print_vec(vector<T> x) {
+    for (T s : x) {
+        cout << s << " ";
     }
+    cout <<"\n";
 }
 //Malformed JSONs in dataset. 
 //Extracting only neccessary data from each line.
@@ -181,11 +182,11 @@ void ReadData::id_stats(string metadata) {
     }
     for (auto const & pair : *id_to_product) {
         vector<string> curr_categories = raw_category_map[pair.first];
-        vector<int> *category_bits = new vector<int>(curr_cat, 0);
+        vector<int> *category_nums = new vector<int>;
         for (string cat : curr_categories) {
-            (*category_bits)[category_num_map[cat]] = 1;
+            category_nums -> push_back(category_num_map[cat]);
         }
-        (*id_to_category_vector)[pair.first] = category_bits;
+        (*id_to_category_vector)[pair.first] = category_nums;
     }
 }
 

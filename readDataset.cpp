@@ -56,6 +56,11 @@ void ReadData::user_ratings(string ratings) {
     }
 }
 
+void print_vec(vector<string> x) {
+    for (string s : x) {
+        cout << s << "\n";
+    }
+}
 //Malformed JSONs in dataset. 
 //Extracting only neccessary data from each line.
 
@@ -84,18 +89,19 @@ string get_title(string line) {
 }
 
 vector<string> get_categories(string line) {
-    size_t index = line.find("categories");
+    size_t index = line.find("\'categories\':");
     vector<string> categories;
     if (index >= line.size()) {return categories;}
-    int i = (int)index + 14;
+    int i = (int)index + 15;
     stringstream s;
     while (line[i] != ']') {
-        if (line[i] != '\'')
-            s << line[i];
         if (line[i] == ',')  {
             categories.push_back(s.str());
             s.str("");
+            i++;
         }
+        if (line[i] != '\'' && line[i] != '[' && line[i] != ',' && line[i] != ' ')
+            s << line[i];
         i++;
     }
     categories.push_back(s.str());
@@ -114,28 +120,25 @@ vector<string> get_rank(string line) {
             s.str("");
             i++;
         }
-        if (line[i] != '\'')
+        if (line[i] != '\'' && line[i] != '[' && line[i] != ',')
             s << line[i];
         i++;
     }
-    cells.push_back(s.str());
+    if (s.str().size() > 0) {
+        cells.push_back(s.str());
+    }
     return cells;
 }
 
-void print_vec(vector<string> x) {
-    for (string s : x) {
-        cout << s << "\n";
-    }
-}
 
 void ReadData::id_stats(string metadata) {
+    int curr_cat = 0;
+    unordered_map<string, vector<string>> raw_category_map;
+    unordered_map<string, int> category_num_map;
     for (const auto& entry : fs::directory_iterator(metadata)) {
         cout << "Starting" << entry.path() << "\n";
         ifstream infile(entry.path(), ifstream::binary);
         string line;
-        unordered_map<string, vector<string>> raw_category_map;
-        unordered_map<string, int> category_num_map;
-        int curr_cat = 0;
         while (getline(infile, line, '\n')) {
             string asin = get_asin(line);
             string title = get_title(line);
@@ -143,9 +146,6 @@ void ReadData::id_stats(string metadata) {
             vector<string> cat_rank = get_rank(line);
             id_to_product[asin] = title;
             raw_category_map[asin] = categories;
-            cout << asin << "\n";
-            print_vec(categories);
-            cout << line << "\n";
             id_to_category_rank[asin] = cat_rank.size() > 0 ? stoi(cat_rank[1]) : INT32_MAX;
             for (string s : categories) {
                 if (category_num_map.count(s) == 0) {

@@ -24,7 +24,7 @@ class ReadData {
         unordered_map<string, unordered_map<string, string>*> *user_to_item_rating;
         unordered_map<string, vector<int>*> *id_to_category_vector;
         unordered_map<string, int> *id_to_category_rank;
-
+        int max_categories;
         ReadData();
         void user_ratings(string ratings);
         void id_stats(string metadata);
@@ -78,6 +78,7 @@ void ReadData::user_ratings(string ratings) {
         cout << "Total number of Users: " << (*user_to_item_rating).size() << "\n";
     }
 }
+
 template <typename T>
 void print_vec(vector<T> x) {
     for (T s : x) {
@@ -180,6 +181,7 @@ void ReadData::id_stats(string metadata) {
         }
         cout << "Total number of Categories: " << curr_cat << "\n";
     }
+    max_categories = curr_cat;
     for (auto const & pair : *id_to_product) {
         vector<string> curr_categories = raw_category_map[pair.first];
         vector<int> *category_nums = new vector<int>;

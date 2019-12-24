@@ -20,22 +20,41 @@ void print_map(unordered_map<string, unordered_map<string, string>> map) {
 
 class ReadData {
     public:
-        unordered_map<string, string> id_to_product;
-        unordered_map<string, unordered_map<string, string>> user_to_item_rating;
-        unordered_map<string, vector<int>> id_to_category_vector;
-        unordered_map<string, int> id_to_category_rank;
+        unordered_map<string, string> *id_to_product;
+        unordered_map<string, unordered_map<string, string>*> *user_to_item_rating;
+        unordered_map<string, vector<int>*> *id_to_category_vector;
+        unordered_map<string, int> *id_to_category_rank;
 
         ReadData();
         void user_ratings(string ratings);
         void id_stats(string metadata);
+        ~ReadData();
 };
 
 
 ReadData::ReadData() {
     string ratings = "../Datasets/Ratings";
     string metadata = "../Datasets/Metadata";
-    // user_ratings(ratings);
+    id_to_product = new unordered_map<string, string>;
+    user_to_item_rating = new unordered_map<string, unordered_map<string, string>*>;
+    id_to_category_vector = new unordered_map<string, vector<int>*>;
+    id_to_category_rank = new unordered_map<string, int>; 
+    user_ratings(ratings);
     id_stats(metadata);
+}
+
+ReadData::~ReadData() {
+    cout << "Destructor called \n";
+    delete id_to_product;
+    for (auto const & entry : *user_to_item_rating) {
+        delete entry.second;
+    }
+    delete user_to_item_rating;
+    for (auto const & entry : *id_to_category_vector) {
+        delete entry.second;
+    }
+    delete id_to_category_vector;
+    delete id_to_category_rank;
 }
 
 
@@ -50,9 +69,13 @@ void ReadData::user_ratings(string ratings) {
             while (getline(br, word, ',')) {
                 line.push_back(word);
             }
-            user_to_item_rating[line[0]][line[1]] = line[2];
+            if ((*user_to_item_rating).count(line[0]) == 0) {
+                (*user_to_item_rating)[line[0]] = new unordered_map<string, string>;
+            }
+            (*(*user_to_item_rating)[line[0]])[line[1]] = line[2];
             line.clear();
         }
+        cout << "Total number of Users: " << (*user_to_item_rating).size() << "\n";
     }
 }
 
@@ -144,21 +167,30 @@ void ReadData::id_stats(string metadata) {
             string title = get_title(line);
             vector<string> categories = get_categories(line);
             vector<string> cat_rank = get_rank(line);
-            id_to_product[asin] = title;
+            (*id_to_product)[asin] = title;
             raw_category_map[asin] = categories;
-            id_to_category_rank[asin] = cat_rank.size() > 0 ? stoi(cat_rank[1]) : INT32_MAX;
+            (*id_to_category_rank)[asin] = cat_rank.size() > 0 ? stoi(cat_rank[1]) : INT32_MAX;
             for (string s : categories) {
                 if (category_num_map.count(s) == 0) {
                     category_num_map[s] = curr_cat;
                     curr_cat++;
                 }
             }
-            cout << "CurrCat num " << curr_cat << "\n";
         }
+        cout << "Total number of Categories: " << curr_cat << "\n";
+    }
+    for (auto const & pair : *id_to_product) {
+        vector<string> curr_categories = raw_category_map[pair.first];
+        vector<int> *category_bits = new vector<int>(curr_cat, 0);
+        for (string cat : curr_categories) {
+            (*category_bits)[category_num_map[cat]] = 1;
+        }
+        (*id_to_category_vector)[pair.first] = category_bits;
     }
 }
 
 int main() {
-    ReadData x = ReadData();
+    ReadData *x = new ReadData();
+    delete x;
     return 0;
 }

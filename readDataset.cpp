@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <experimental/filesystem>
-// #include <jsoncpp/json/json.h>
+#include "readDataset.h"
 
 using namespace std;
 namespace fs = experimental::filesystem;
@@ -18,19 +18,13 @@ void print_map(unordered_map<string, unordered_map<string, string>> map) {
     }
 }
 
-class ReadData {
-    public:
-        unordered_map<string, string> *id_to_product;
-        unordered_map<string, unordered_map<string, string>*> *user_to_item_rating;
-        unordered_map<string, vector<int>*> *id_to_category_vector;
-        unordered_map<string, int> *id_to_category_rank;
-        int max_categories;
-        ReadData();
-        void user_ratings(string ratings);
-        void id_stats(string metadata);
-        ~ReadData();
-};
-
+template <typename T>
+void print_vec(vector<T> x) {
+    for (T s : x) {
+        cout << s << " ";
+    }
+    cout <<"\n";
+}
 
 ReadData::ReadData() {
     string ratings = "../Datasets/Ratings";
@@ -77,14 +71,6 @@ void ReadData::user_ratings(string ratings) {
         }
         cout << "Total number of Users: " << (*user_to_item_rating).size() << "\n";
     }
-}
-
-template <typename T>
-void print_vec(vector<T> x) {
-    for (T s : x) {
-        cout << s << " ";
-    }
-    cout <<"\n";
 }
 //Malformed JSONs in dataset. 
 //Extracting only neccessary data from each line.
@@ -192,8 +178,3 @@ void ReadData::id_stats(string metadata) {
     }
 }
 
-int main() {
-    ReadData *x = new ReadData();
-    delete x;
-    return 0;
-}

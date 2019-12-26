@@ -1,5 +1,7 @@
 #include "metrics.h"
 #include "math.h"
+#include <algorithm>
+
 
 using namespace std;
 
@@ -21,5 +23,19 @@ double RMSE(vector<Prediction> predictions) {
         num++;
     }
     return sqrt(abs_sqr_err/num);
+}
+
+bool comparePredictions(Prediction p1, Prediction p2) 
+{ 
+    return (stoi(p2.estimated_rating) < stoi(p1.estimated_rating)); 
+} 
+
+void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Prediction>> *topN_per_user) {
+    for (Prediction p : predictions) {
+        (*topN_per_user)[p.user_id].push_back(p);
+    }
+    for (auto const & pair : (*topN_per_user)) {
+        sort(pair.second.begin(), pair.second.end(), comparePredictions);
+    }
 }
 

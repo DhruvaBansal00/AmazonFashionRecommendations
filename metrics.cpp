@@ -39,3 +39,41 @@ void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Pr
     }
 }
 
+double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int topN) {
+    uint hits = 0;
+    uint total = 0;
+    for (Prediction p : left_out_predictions) {
+        int rank = 0;
+        for (Prediction n : (*topN_per_user)[p.user_id]) {
+            if (n.product_id == p.product_id) {
+                if (rank < topN) {
+                    hits++;
+                }
+            }
+            rank++;
+        }
+        total++;
+    }
+    return double(hits)/total;
+}
+
+double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int ratingCutoff, int topN) {
+    uint hits = 0;
+    uint total = 0;
+    for (Prediction p : left_out_predictions) {
+        if (stoi(p.actual_rating) >= ratingCutoff) {
+            int rank = 0;
+            for (Prediction n : (*topN_per_user)[p.user_id]) {
+                if (n.product_id == p.product_id) {
+                    if (rank < topN) {
+                        hits++;
+                    }
+                }
+                rank++;
+            }
+            total++;
+        }
+    }
+    return double(hits)/total;
+}
+

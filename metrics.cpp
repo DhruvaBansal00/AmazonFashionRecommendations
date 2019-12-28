@@ -36,7 +36,7 @@ void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Pr
         (*topN_per_user)[p.user_id].push_back(p);
     }
     for (auto const & pair : (*topN_per_user)) {
-        sort(pair.second.begin(), pair.second.end(), comparePredictions);
+        sort((*topN_per_user)[pair.first].begin(), (*topN_per_user)[pair.first].end(), comparePredictions);
     }
 }
 
@@ -46,7 +46,7 @@ double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<P
     for (Prediction p : left_out_predictions) {
         int rank = 0;
         for (Prediction n : (*topN_per_user)[p.user_id]) {
-            if (n.product_id == p.product_id) {
+            if (n.product_id.compare(p.product_id) == 0) {
                 if (rank < topN) {
                     hits++;
                 }
@@ -65,7 +65,7 @@ double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user
         if (stoi(p.actual_rating) >= ratingCutoff) {
             int rank = 0;
             for (Prediction n : (*topN_per_user)[p.user_id]) {
-                if (n.product_id == p.product_id) {
+                if (n.product_id.compare(p.product_id) == 0) {
                     if (rank < topN) {
                         hits++;
                     }
@@ -83,7 +83,7 @@ void ratingHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vect
     unordered_map<string, int> total;
     for (Prediction p : left_out_predictions) {
         for (Prediction q : (*topN_per_user)[p.user_id]) {
-            if (q.product_id == p.product_id) {
+            if (q.product_id.compare(p.product_id) == 0) {
                 hits[p.actual_rating]++;
             }
         }
@@ -101,7 +101,7 @@ double averageReciprocalHitRank(unordered_map<string,vector<Prediction>> *topN_p
     for (Prediction p : left_out_predictions) {
         int rank = 1;
         for (Prediction n : (*topN_per_user)[p.user_id]) {
-            if (n.product_id == p.product_id) {
+            if (n.product_id.compare(p.product_id) == 0) {
                 summation += 1.0/rank;
             }
             rank++;

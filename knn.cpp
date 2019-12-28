@@ -34,7 +34,7 @@ void ContentKNN::compute_similarity(ReadData *dataset) {
                 if ((*(*similarity_scores)[pair1.first]).count(pair2.first) == 0) {
                     (*similarity_scores)[pair1.first] = new unordered_map<string, double>();
                 }
-                (*(*similarity_scores)[pair1.first])[pair2.first] = category_similarity(pair1.first, pair2.first);
+                (*(*similarity_scores)[pair1.first])[pair2.first] = category_similarity(pair1.second, pair2.second);
             }
         }
     }

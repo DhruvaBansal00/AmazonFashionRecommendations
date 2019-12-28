@@ -16,7 +16,7 @@ readDataset.o: readDataset.cpp readDataset.h
 metrics.o: metrics.cpp metrics.h
 	g++ -c metrics.cpp 
 
-knn.o : knn.cpp knn.hp
+knn.o : knn.cpp knn.h
 	g++ -c knn.cpp
 
  clean:

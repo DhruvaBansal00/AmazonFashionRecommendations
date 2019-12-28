@@ -1,6 +1,7 @@
 #include "metrics.h"
 #include "math.h"
 #include <algorithm>
+#include <iostream>
 
 
 using namespace std;
@@ -77,3 +78,61 @@ double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user
     return double(hits)/total;
 }
 
+void ratingHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions) {
+    unordered_map<string, int> hits;
+    unordered_map<string, int> total;
+    for (Prediction p : left_out_predictions) {
+        for (Prediction q : (*topN_per_user)[p.user_id]) {
+            if (q.product_id == p.product_id) {
+                hits[p.actual_rating]++;
+            }
+        }
+        total[p.actual_rating]++;
+    }
+    for (auto const & pair : hits) {
+        cout << pair.first << " : " << pair.second/total[pair.first] << "\n";
+    }
+}
+
+double averageReciprocalHitRank(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions) {
+    uint hits = 0;
+    uint total = 0;
+    double summation = 0;
+    for (Prediction p : left_out_predictions) {
+        int rank = 1;
+        for (Prediction n : (*topN_per_user)[p.user_id]) {
+            if (n.product_id == p.product_id) {
+                summation += 1.0/rank;
+            }
+            rank++;
+        }
+        total++;
+    }
+    return summation/total;
+}
+
+double userCoverage(unordered_map<string,vector<Prediction>> *topN_per_user, int numUsers, int ratingCutoff) {
+    int hits = 0;
+
+    for (auto const & pair : (*topN_per_user)) {
+        for (Prediction p : pair.second) {
+            if (stoi(p.estimated_rating) >= ratingCutoff) {
+                hits++;
+            }
+        }
+    }
+
+    return double(hits)/numUsers;
+}
+
+double novelty(unordered_map<string,vector<Prediction>> *topN_per_user, ReadData *dataset) {
+    int n = 0;
+    int total = 0;
+    for (auto const & pair : (*topN_per_user)) {
+        for (Prediction p : pair.second) {
+            total += (*(*dataset).id_to_category_rank)[p.user_id];
+            n++;
+        }
+    }
+    return double(total)/n;
+}

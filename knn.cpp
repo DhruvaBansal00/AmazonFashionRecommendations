@@ -1,9 +1,12 @@
 #include "math.h"
 #include "knn.h"
 #include <unordered_set>
+#include <queue>
 
-ContentKNN::ContentKNN(ReadData *dataset) {
+ContentKNN::ContentKNN(ReadData *dataset, int k) {
     similarity_scores = new unordered_map<string, unordered_map<string, double>*>();
+    (*this).dataset = dataset;
+    (*this).k = k;
     compute_similarity(dataset);
 }
 
@@ -40,6 +43,42 @@ void ContentKNN::compute_similarity(ReadData *dataset) {
     }
 }
 
+typedef struct  {
+    string item;
+    double similarity;
+    string rating;
+} Neighbor;
+
+struct compareNeighbor{
+    bool operator()(Neighbor a, Neighbor b) {
+        return a.similarity > b.similarity;
+    }
+}; 
+
 double ContentKNN::estimate_rating(string user, string item) {
-    return 0.0;
+    unordered_map<string, string> curr_user_ratings = *(*(*dataset).user_to_item_rating)[user];
+    priority_queue<Neighbor, vector<Neighbor>, compareNeighbor> closestNeighbors;
+
+    for (auto const & pair : curr_user_ratings) {
+        closestNeighbors.push({pair.first, (*(*similarity_scores)[item])[pair.first], pair.second});
+    }
+
+    vector<Neighbor> closestKNeighbors;
+    int neighbors = k;
+    while (neighbors > 0 && closestNeighbors.size() != 0) {
+        closestNeighbors.push(closestNeighbors.top());
+        closestNeighbors.pop();
+        neighbors--;
+    }
+
+    double similarityTotal = 0;
+    double weightedSum = 0;
+    
+    for (Neighbor n : closestKNeighbors) {
+        similarityTotal += n.similarity;
+        weightedSum += stoi(n.rating)*n.similarity;
+    }
+
+    return weightedSum/similarityTotal;
+
 }

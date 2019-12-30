@@ -4,7 +4,7 @@
 #include <queue>
 #include <iostream>
 
-ContentKNN::ContentKNN(unordered_map<string, unordered_map<string, string>*> *trainset, int k, ReadData* dataset) {
+ContentKNN::ContentKNN(Set* trainset, int k, ReadData* dataset) {
     similarity_scores = new unordered_map<string, unordered_map<string, double>*>();
     (*this).trainset = trainset;
     (*this).dataset = dataset;
@@ -22,9 +22,12 @@ ContentKNN::~ContentKNN() {
 
 double category_similarity(vector<int>* product1, vector<int>* product2) { 
     cout << "Computing current category similarity\n";
-    int sumxx = (*product1).size();
-    int sumyy = (*product2).size();
-    unordered_set<int> product2_categories((*product2).begin(), (*product2).begin());
+    cout << "Curr sizes = " << (*product1).size() << " " << (*product2).size() << "\n";
+    uint sumxx = uint((*product1).capacity());
+    uint sumyy = uint((*product2).capacity());
+    unordered_set<int> product2_categories;;
+    cout << "Adding elements\n";
+    for (int temp : *product2) {product2_categories.insert(temp);}
     int sumxy = 0;
     for (int cat1 : *product1) {
         if (product2_categories.count(cat1) != 0) {
@@ -34,16 +37,16 @@ double category_similarity(vector<int>* product1, vector<int>* product2) {
     return sumxx*sumyy == 0 ? 0 : double(sumxy)/sqrt(sumxx*sumyy);
 }
 
-void ContentKNN::compute_similarity(unordered_map<string, unordered_map<string, string>*> *trainset) {
-    for (auto const & pair1 : *trainset) {
-        for (auto const & pair2 : *trainset) {
-            cout << "Comparing strings: " << (pair1.first).compare(pair2.first) << "\n";
-            if ((pair1.first).compare(pair2.first) != 0) {
-                if ((*similarity_scores).count(pair1.first) == 0) {
-                    (*similarity_scores)[pair1.first] = new unordered_map<string, double>();
+void ContentKNN::compute_similarity(Set *trainset) {
+    for (string product1 : *(*trainset).products) {
+        for (string product2 : *(*trainset).products) {
+            cout << product1 << " " << product2<< "\n";
+            if ((product1).compare(product2) != 0) {
+                if ((*similarity_scores).count(product1) == 0) {
+                    (*similarity_scores)[product1] = new unordered_map<string, double>();
                 }
-                (*(*similarity_scores)[pair1.first])[pair2.first] = 
-                    category_similarity((*(*dataset).id_to_category_vector)[pair1.first], (*(*dataset).id_to_category_vector)[pair2.first]);
+                (*(*similarity_scores)[product1])[product2] = 
+                    category_similarity((*(*dataset).id_to_category_vector)[product1], (*(*dataset).id_to_category_vector)[product2]);
             }
         }
     }
@@ -62,7 +65,7 @@ struct compareNeighbor{
 }; 
 
 double ContentKNN::estimate_rating(string user, string item) {
-    unordered_map<string, string> curr_user_ratings = *(*trainset)[user];
+    unordered_map<string, string> curr_user_ratings = *(*(*trainset).user_product_rating)[user];
     priority_queue<Neighbor, vector<Neighbor>, compareNeighbor> closestNeighbors;
 
     for (auto const & pair : curr_user_ratings) {

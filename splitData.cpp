@@ -1,25 +1,25 @@
 #include "splitData.h"
 #include <iostream>
 
-void SplitDataset::add(string user, string item, string rating, unordered_map<string, unordered_map<string, string>*>* set) {
-    if ((*set).count(user) == 0) {
-        (*set)[user] = new unordered_map<string, string>;
+void SplitDataset::add(string user, string item, string rating, Set *set) {
+    if ((*(*set).user_product_rating).count(user) == 0) {
+        (*(*set).user_product_rating)[user] = new unordered_map<string, string>;
     }
-    (*(*set)[user])[item] = rating;
+    (*(*(*set).user_product_rating)[user])[item] = rating;
+    (*(*set).products).insert(item);
 }
 
 SplitDataset::SplitDataset(ReadData* data, double testProp) {
-    testset = new unordered_map<string, unordered_map<string, string>*>;
-    trainset = new unordered_map<string, unordered_map<string, string>*>;
+    cout << "Splitting data\n";
+    testset = new Set;
+    trainset = new Set;
     srand(time(0));
     for (auto const & pair1 : *(*data).user_to_item_rating) {
         for (auto const & pair2 : *pair1.second) {
             double thresh = random()/double(RAND_MAX);
             if ( thresh <= testProp) {
-                cout << "Adding to test " << thresh << "\n";
                 add(pair1.first, pair2.first, pair2.second, testset);
             } else {
-                cout << "Adding to train " << thresh << "\n";
                 add(pair1.first, pair2.first, pair2.second, trainset);
             }
         }
@@ -27,14 +27,16 @@ SplitDataset::SplitDataset(ReadData* data, double testProp) {
 }
 
 SplitDataset::~SplitDataset() {
-    for (auto const & pair : *testset) {
+    for (auto const & pair : *(*testset).user_product_rating) {
         delete pair.second;
     }
-    delete testset;
+    delete (*testset).user_product_rating;
+    delete (*testset).products;
 
-    for (auto const & pair : *trainset) {
+    for (auto const & pair : *(*trainset).user_product_rating) {
         delete pair.second;
     }
-    delete trainset;
+    delete (*trainset).user_product_rating;
+    delete (*trainset).products;
 }
 

@@ -6,10 +6,11 @@ using namespace std;
 class ContentKNN {
     public:
         unordered_map<string, unordered_map<string, double>*> *similarity_scores;
-        ReadData *dataset;
+        unordered_map<string, unordered_map<string, string>*> *trainset;
         int k;
-        ContentKNN(ReadData* dataset, int k);
+        ReadData* dataset;
+        ContentKNN(unordered_map<string, unordered_map<string, string>*> *trainset, int k, ReadData* dataset);
         ~ContentKNN();
-        void compute_similarity(ReadData *dataset);
+        void compute_similarity(unordered_map<string, unordered_map<string, string>*> *trainset);
         double estimate_rating(string user, string item);
 };

@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void print_map(unordered_map<string, unordered_map<string, string>> map);
-
 class ReadData {
     public:
         unordered_map<string, string> *id_to_product;
@@ -19,3 +17,5 @@ class ReadData {
         ~ReadData();
 };
 
+
+void print_map(unordered_map<string, unordered_map<string, string>> map);

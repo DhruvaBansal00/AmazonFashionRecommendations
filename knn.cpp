@@ -3,11 +3,12 @@
 #include <unordered_set>
 #include <queue>
 
-ContentKNN::ContentKNN(ReadData *dataset, int k) {
+ContentKNN::ContentKNN(unordered_map<string, unordered_map<string, string>*> *trainset, int k, ReadData* dataset) {
     similarity_scores = new unordered_map<string, unordered_map<string, double>*>();
+    (*this).trainset = trainset;
     (*this).dataset = dataset;
     (*this).k = k;
-    compute_similarity(dataset);
+    compute_similarity(trainset);
 }
 
 ContentKNN::~ContentKNN() {
@@ -30,14 +31,15 @@ double category_similarity(vector<int>* product1, vector<int>* product2) {
     return double(sumxy)/sqrt(sumxx*sumyy);
 }
 
-void ContentKNN::compute_similarity(ReadData *dataset) {
-    for (auto const & pair1 : *(*dataset).id_to_category_vector) {
-        for (auto const & pair2 : *(*dataset).id_to_category_vector) {
+void ContentKNN::compute_similarity(unordered_map<string, unordered_map<string, string>*> *trainset) {
+    for (auto const & pair1 : *trainset) {
+        for (auto const & pair2 : *trainset) {
             if (pair1.first.compare(pair2.first) != 0) {
                 if ((*(*similarity_scores)[pair1.first]).count(pair2.first) == 0) {
                     (*similarity_scores)[pair1.first] = new unordered_map<string, double>();
                 }
-                (*(*similarity_scores)[pair1.first])[pair2.first] = category_similarity(pair1.second, pair2.second);
+                (*(*similarity_scores)[pair1.first])[pair2.first] = 
+                    category_similarity((*(*dataset).id_to_category_vector)[pair1.first], (*(*dataset).id_to_category_vector)[pair2.first]);
             }
         }
     }
@@ -56,7 +58,7 @@ struct compareNeighbor{
 }; 
 
 double ContentKNN::estimate_rating(string user, string item) {
-    unordered_map<string, string> curr_user_ratings = *(*(*dataset).user_to_item_rating)[user];
+    unordered_map<string, string> curr_user_ratings = *(*trainset)[user];
     priority_queue<Neighbor, vector<Neighbor>, compareNeighbor> closestNeighbors;
 
     for (auto const & pair : curr_user_ratings) {
@@ -80,5 +82,4 @@ double ContentKNN::estimate_rating(string user, string item) {
     }
 
     return weightedSum/similarityTotal;
-
 }

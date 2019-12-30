@@ -1,8 +1,8 @@
-#include "metrics.h"
+#include "splitData.h"
 #include <iostream>
 
 int main() {
-    ReadData *x = new ReadData();
-    delete x;
+    ReadData *data = new ReadData();
+    SplitDataset *testAndTrain = new SplitDataset(data, 0.15);
     return 0;
 }

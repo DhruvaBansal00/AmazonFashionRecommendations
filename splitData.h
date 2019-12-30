@@ -3,10 +3,11 @@
 
 using namespace std;
 
-typedef struct {
-    unordered_map<string, unordered_map<string, string>*> *user_product_rating;
-    unordered_set<string> *products;
-} Set;
+class Set {
+    public:
+        unordered_map<string, unordered_map<string, string>*> *user_product_rating;
+        unordered_set<string> *products;
+};
 
 class SplitDataset {
     public:

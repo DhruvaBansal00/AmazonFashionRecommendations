@@ -21,12 +21,9 @@ ContentKNN::~ContentKNN() {
 }
 
 double category_similarity(vector<int>* product1, vector<int>* product2) { 
-    cout << "Computing current category similarity\n";
-    cout << "Curr sizes = " << (*product1).size() << " " << (*product2).size() << "\n";
     uint sumxx = uint((*product1).capacity());
     uint sumyy = uint((*product2).capacity());
     unordered_set<int> product2_categories;;
-    cout << "Adding elements\n";
     for (int temp : *product2) {product2_categories.insert(temp);}
     int sumxy = 0;
     for (int cat1 : *product1) {

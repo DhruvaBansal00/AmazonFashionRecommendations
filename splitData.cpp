@@ -1,4 +1,5 @@
 #include "splitData.h"
+#include <iostream>
 
 void SplitDataset::add(string user, string item, string rating, unordered_map<string, unordered_map<string, string>*>* set) {
     if ((*set).count(user) == 0) {
@@ -13,9 +14,12 @@ SplitDataset::SplitDataset(ReadData* data, double testProp) {
     srand(time(0));
     for (auto const & pair1 : *(*data).user_to_item_rating) {
         for (auto const & pair2 : *pair1.second) {
-            if (random()/(double(RAND_MAX) <= testProp)) {
+            double thresh = random()/double(RAND_MAX);
+            if ( thresh <= testProp) {
+                cout << "Adding to test " << thresh << "\n";
                 add(pair1.first, pair2.first, pair2.second, testset);
             } else {
+                cout << "Adding to train " << thresh << "\n";
                 add(pair1.first, pair2.first, pair2.second, trainset);
             }
         }

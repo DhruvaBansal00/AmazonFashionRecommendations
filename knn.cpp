@@ -4,23 +4,14 @@
 #include <queue>
 #include <iostream>
 
+
 ContentKNN::ContentKNN(Set* trainset, int k, ReadData* dataset) {
-    similarity_scores = new unordered_map<string, unordered_map<string, double>*>();
     (*this).trainset = trainset;
     (*this).dataset = dataset;
     (*this).k = k;
-    cout << "Computing similarity matrix now\n";
-    compute_similarity(trainset);
 }
 
-ContentKNN::~ContentKNN() {
-    for (auto const & pair : *similarity_scores) {
-        delete pair.second;
-    }
-    delete similarity_scores;
-}
-
-double category_similarity(vector<int>* product1, vector<int>* product2) { 
+double category_similarity(vector<int>* product1, vector<int>* product2) {
     uint sumxx = uint((*product1).capacity());
     uint sumyy = uint((*product2).capacity());
     unordered_set<int> product2_categories;;
@@ -34,21 +25,6 @@ double category_similarity(vector<int>* product1, vector<int>* product2) {
     return sumxx*sumyy == 0 ? 0 : double(sumxy)/sqrt(sumxx*sumyy);
 }
 
-void ContentKNN::compute_similarity(Set *trainset) {
-    for (string product1 : *(*trainset).products) {
-        for (string product2 : *(*trainset).products) {
-            cout << product1 << " " << product2<< "\n";
-            if ((product1).compare(product2) != 0) {
-                if ((*similarity_scores).count(product1) == 0) {
-                    (*similarity_scores)[product1] = new unordered_map<string, double>();
-                }
-                (*(*similarity_scores)[product1])[product2] = 
-                    category_similarity((*(*dataset).id_to_category_vector)[product1], (*(*dataset).id_to_category_vector)[product2]);
-            }
-        }
-    }
-}
-
 typedef struct  {
     string item;
     double similarity;
@@ -57,16 +33,18 @@ typedef struct  {
 
 struct compareNeighbor{
     bool operator()(Neighbor a, Neighbor b) {
-        return a.similarity > b.similarity;
+        return a.similarity < b.similarity;
     }
 }; 
 
 double ContentKNN::estimate_rating(string user, string item) {
+    // cout << "Estimating Rating of " << user << " and " << item << "\n"; 
     unordered_map<string, string> curr_user_ratings = *(*(*trainset).user_product_rating)[user];
     priority_queue<Neighbor, vector<Neighbor>, compareNeighbor> closestNeighbors;
-
     for (auto const & pair : curr_user_ratings) {
-        closestNeighbors.push({pair.first, (*(*similarity_scores)[item])[pair.first], pair.second});
+        closestNeighbors.push({pair.first, 
+        category_similarity((*(*dataset).id_to_category_vector)[item], (*(*dataset).id_to_category_vector)[pair.first]), 
+        pair.second});
     }
 
     vector<Neighbor> closestKNeighbors;
@@ -81,13 +59,13 @@ double ContentKNN::estimate_rating(string user, string item) {
     double weightedSum = 0;
     
     for (Neighbor n : closestKNeighbors) {
-        cout << n.item << " " << n.rating << " " << n.similarity << "\n";
+        // cout << n.item << " " << n.rating << " " << n.similarity << "\n";
         similarityTotal += n.similarity;
         weightedSum += stoi(n.rating)*n.similarity;
     }
 
-    if (similarityTotal == 0) {
-        cout << "NOT ENOUGH DATA FOR THIS INPUT\n";
-    }
+    // if (similarityTotal == 0) {
+    //     cout << "NOT ENOUGH DATA FOR THIS INPUT\n";
+    // }
     return similarityTotal == 0 ? 0 : weightedSum/similarityTotal;
 }

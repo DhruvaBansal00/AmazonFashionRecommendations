@@ -17,19 +17,26 @@ SplitDataset::SplitDataset(ReadData* data, double testProp) {
     (*testset).products = new unordered_set<string>;
     (*trainset).user_product_rating = new unordered_map<string, unordered_map<string, string>*>;
     (*trainset).products = new unordered_set<string>;
+    int elements_in_train = 0;
+    int elements_in_test = 0;
     srand(time(0));
     for (auto const & pair1 : *(*data).user_to_item_rating) {
-        for (auto const & pair2 : *pair1.second) {
-            double thresh = random()/double(RAND_MAX);
-            if ( thresh <= testProp) {
-                // cout << "Adding to test set\n";
-                add(pair1.first, pair2.first, pair2.second, testset);
-            } else {
-                // cout << "Adding to train set\n";
-                add(pair1.first, pair2.first, pair2.second, trainset);
+        if ((*pair1.second).size() >= 5) { //Filtering out users with less than 5 ratings
+            for (auto const & pair2 : *pair1.second) {
+                double thresh = random()/double(RAND_MAX);
+                if ( thresh <= testProp) {
+                    // cout << "Adding to test set\n";
+                    add(pair1.first, pair2.first, pair2.second, testset);
+                    elements_in_test++;
+                } else {
+                    // cout << "Adding to train set\n";
+                    add(pair1.first, pair2.first, pair2.second, trainset);
+                    elements_in_train++;
+                }
             }
         }
     }
+    cout << "Elemenets in train: "<<elements_in_train << " Elemenets in test: "<<elements_in_test <<"\n";
 }
 
 SplitDataset::~SplitDataset() {

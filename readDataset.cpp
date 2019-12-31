@@ -24,8 +24,8 @@ void print_vec(vector<T> x) {
 }
 
 ReadData::ReadData() {
-    string ratings = "../Datasets/Ratings";
-    string metadata = "../Datasets/Metadata";
+    string ratings = "../Datasets/UsingRatings";
+    string metadata = "../Datasets/UsingMetadata";
     id_to_product = new unordered_map<string, string>;
     user_to_item_rating = new unordered_map<string, unordered_map<string, string>*>;
     id_to_category_vector = new unordered_map<string, vector<int>*>;

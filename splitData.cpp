@@ -6,17 +6,35 @@ void SplitDataset::add(string user, string item, string rating, Set *set) {
         (*(*set).user_product_rating)[user] = new unordered_map<string, string>;
     }
     (*(*(*set).user_product_rating)[user])[item] = rating;
-    (*(*set).products).insert(item);
+    (*(*set).products).insert(item);        
 }
 
 SplitDataset::SplitDataset(ReadData* data, double testProp) {
     cout << "Splitting data\n";
     testset = new Set();
     trainset = new Set();
+    loocv_test_set = new Set();
+    loocv_train_set = new Set();
+    split_test_train(data, testProp);
+    create_loocv_dataset(data);
+}
+
+void SplitDataset::create_loocv_dataset(ReadData* data) {
+    for (auto const pair1 : *(*data).user_to_item_rating) {
+        if ((*pair1.second).size() >= 5) { //Filtering out users with less than 5 ratings
+            for (auto const & pair2 : *pair1.second) {
+                
+            }
+        }
+    }
+}
+
+void SplitDataset::split_test_train(ReadData* data, double testProp) {
     (*testset).user_product_rating = new unordered_map<string, unordered_map<string, string>*>;
     (*testset).products = new unordered_set<string>;
     (*trainset).user_product_rating = new unordered_map<string, unordered_map<string, string>*>;
     (*trainset).products = new unordered_set<string>;
+    complete_dataset = data;
     int elements_in_train = 0;
     int elements_in_test = 0;
     srand(time(0));
@@ -38,6 +56,7 @@ SplitDataset::SplitDataset(ReadData* data, double testProp) {
     }
     cout << "Elemenets in train: "<<elements_in_train << " Elemenets in test: "<<elements_in_test <<"\n";
 }
+
 
 SplitDataset::~SplitDataset() {
     for (auto const & pair : *(*testset).user_product_rating) {

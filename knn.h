@@ -3,6 +3,8 @@
 
 using namespace std;
 
+
+
 class ContentKNN {
     public:
         Set *trainset;

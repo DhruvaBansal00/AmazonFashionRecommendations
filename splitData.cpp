@@ -16,17 +16,6 @@ SplitDataset::SplitDataset(ReadData* data, double testProp) {
     loocv_test_set = new Set();
     loocv_train_set = new Set();
     split_test_train(data, testProp);
-    create_loocv_dataset(data);
-}
-
-void SplitDataset::create_loocv_dataset(ReadData* data) {
-    for (auto const pair1 : *(*data).user_to_item_rating) {
-        if ((*pair1.second).size() >= 5) { //Filtering out users with less than 5 ratings
-            for (auto const & pair2 : *pair1.second) {
-                
-            }
-        }
-    }
 }
 
 void SplitDataset::split_test_train(ReadData* data, double testProp) {
@@ -39,8 +28,14 @@ void SplitDataset::split_test_train(ReadData* data, double testProp) {
     int elements_in_test = 0;
     srand(time(0));
     for (auto const & pair1 : *(*data).user_to_item_rating) {
+        bool first = true;
         if ((*pair1.second).size() >= 5) { //Filtering out users with less than 5 ratings
             for (auto const & pair2 : *pair1.second) {
+                if (first) {
+                    add(pair1.first, pair2.first, pair2.second, loocv_test_set);
+                } else {
+                    add(pair1.first, pair2.first, pair2.second, loocv_train_set);
+                }
                 double thresh = random()/double(RAND_MAX);
                 if ( thresh <= testProp) {
                     // cout << "Adding to test set\n";

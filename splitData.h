@@ -21,7 +21,6 @@ class SplitDataset {
         SplitDataset(ReadData *data, double testProp);
         ~SplitDataset();
     private:
-        void create_loocv_dataset(ReadData* data);
         void split_test_train(ReadData* data, double testProp);
         void add(string user, string item, string rating, Set* set);
 };

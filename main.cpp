@@ -23,6 +23,15 @@ int main() {
     cout << "RANDOM STATS\n";
     cout << "\tMAE = "<<MAE(random_predictions)<<"\n";
     cout << "\tRMSE = "<<RMSE(random_predictions)<<"\n";
+
+
+    ContentKNN knn(testAndTrain ->loocv_train_set, 5, data);
+    for (auto const & pair1 : *(testAndTrain->complete_dataset->user_to_item_rating)) {
+        for (string product : *testAndTrain->loocv_test_set->products) {
+            double rating = knn.estimate_rating(pair1.first, product);
+        }
+    }
+
     delete testAndTrain;
     delete data;
     return 0;

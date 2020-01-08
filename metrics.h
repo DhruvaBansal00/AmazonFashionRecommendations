@@ -10,7 +10,7 @@ typedef struct {
 
 double MAE(vector<Prediction>);
 double RMSE(vector<Prediction>);
-void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Prediction>> *topN_per_user);
+// void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Prediction>> *topN_per_user);
 double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int topN);
 double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int ratingCutoff, int topN);
 void ratingHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions);

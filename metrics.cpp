@@ -26,19 +26,19 @@ double RMSE(vector<Prediction> predictions) {
     return sqrt(abs_sqr_err/num);
 }
 
-bool comparePredictions(Prediction p1, Prediction p2) 
-{ 
-    return (stoi(p2.estimated_rating) < stoi(p1.estimated_rating)); 
-} 
+// bool comparePredictions(Prediction p1, Prediction p2) 
+// { 
+//     return (stoi(p2.estimated_rating) < stoi(p1.estimated_rating)); 
+// } 
 
-void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Prediction>> *topN_per_user) {
-    for (Prediction p : predictions) {
-        (*topN_per_user)[p.user_id].push_back(p);
-    }
-    for (auto const & pair : (*topN_per_user)) {
-        sort((*topN_per_user)[pair.first].begin(), (*topN_per_user)[pair.first].end(), comparePredictions);
-    }
-}
+// void topN(vector<Prediction> predictions, int n, unordered_map<string, vector<Prediction>> *topN_per_user) {
+//     for (Prediction p : predictions) {
+//         (*topN_per_user)[p.user_id].push_back(p);
+//     }
+//     for (auto const & pair : (*topN_per_user)) {
+//         sort((*topN_per_user)[pair.first].begin(), (*topN_per_user)[pair.first].end(), comparePredictions);
+//     }
+// }
 
 double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int topN) {
     uint hits = 0;

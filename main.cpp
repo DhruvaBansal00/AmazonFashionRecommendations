@@ -1,5 +1,14 @@
 #include "knn.h"
 #include <iostream>
+#include <queue>
+#define N 5
+
+typedef struct {
+    bool operator()(Prediction p1, Prediction p2) 
+    { 
+        return (stoi(p2.estimated_rating) > stoi(p1.estimated_rating)); 
+    } 
+} Compare_Predictions;
 
 int main() {
     srand(time(0));
@@ -26,9 +35,25 @@ int main() {
 
 
     ContentKNN knn(testAndTrain ->loocv_train_set, 5, data);
+    unordered_map<string,vector<Prediction>> *topN_per_user;
     for (auto const & pair1 : *(testAndTrain->complete_dataset->user_to_item_rating)) {
+        priority_queue<Prediction, vector<Prediction>, Compare_Predictions> topN;
         for (string product : *testAndTrain->loocv_test_set->products) {
             double rating = knn.estimate_rating(pair1.first, product);
+            if (topN.size() < N) {
+                topN.push(Prediction{pair1.first, product, to_string(rating),  (*pair1.second)[product]});
+            } else {
+                Prediction topPred = topN.top;
+                if (stod(topPred.estimated_rating) < rating) {
+                    topN.pop;
+                    topN.push(Prediction{pair1.first, product, to_string(rating),  (*pair1.second)[product]});
+                }
+            }
+        }
+        while (topN.size() != 0) {
+            Prediction currPred = topN.top;
+            topN.pop;
+            (*topN_per_user)[pair1.first].push_back(currPred);
         }
     }
 

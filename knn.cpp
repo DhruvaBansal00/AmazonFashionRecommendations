@@ -37,9 +37,14 @@ struct compareNeighbor{
     }
 }; 
 
-double ContentKNN::estimate_rating(string user, string item) {
-    // cout << "Estimating Rating of " << user << " and " << item << "\n"; 
+double ContentKNN::estimate_rating(string user, string item, bool verbose=false) {
+    if (verbose) {
+        cout << "Estimating Rating of " << user << " and " << item << "\n"; 
+    }
     unordered_map<string, string> curr_user_ratings = *(*(*trainset).user_product_rating)[user];
+    if (verbose) {
+        cout << "Found curr user ratings\n"; 
+    }
     priority_queue<Neighbor, vector<Neighbor>, compareNeighbor> closestNeighbors;
     for (auto const & pair : curr_user_ratings) {
         closestNeighbors.push({pair.first, 
@@ -55,11 +60,17 @@ double ContentKNN::estimate_rating(string user, string item) {
         neighbors--;
     }
 
+    if (verbose) {
+        cout << "Found " << k << " neighbors" << "\n"; 
+    }
+
     double similarityTotal = 0;
     double weightedSum = 0;
     
     for (Neighbor n : closestKNeighbors) {
-        // cout << n.item << " " << n.rating << " " << n.similarity << "\n";
+        if (verbose) {
+            cout << n.item << " " << n.rating << " " << n.similarity << "\n";
+        }
         similarityTotal += n.similarity;
         weightedSum += stoi(n.rating)*n.similarity;
     }

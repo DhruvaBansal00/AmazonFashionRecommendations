@@ -12,5 +12,5 @@ class ContentKNN {
         ReadData* dataset;
         ContentKNN(Set* trainset, int k, ReadData* dataset);
         void compute_similarity(Set *trainset);
-        double estimate_rating(string user, string item);
+        double estimate_rating(string user, string item, bool verbose);
 };

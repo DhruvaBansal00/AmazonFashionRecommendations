@@ -6,7 +6,7 @@
 typedef struct {
     bool operator()(Prediction p1, Prediction p2) 
     { 
-        return (stoi(p2.estimated_rating) > stoi(p1.estimated_rating)); 
+        return (stod(p2.estimated_rating) > stod(p1.estimated_rating)); 
     } 
 } Compare_Predictions;
 
@@ -19,7 +19,7 @@ int main() {
     vector<Prediction> random_predictions;
     for (auto const & pair1 : (*(*(*testAndTrain).testset).user_product_rating)) {
         for (auto const & pair2 : *pair1.second) {
-            double predicted_rating = knn.estimate_rating(pair1.first, pair2.first);
+            double predicted_rating = knn.estimate_rating(pair1.first, pair2.first, false);
             double random_prediction = 5*random()/((double)RAND_MAX);
             // cout << "Predicted Rating = " << predicted_rating << " REAL RATING = " << pair2.second << "\n";
             predictions.push_back(Prediction{pair1.first, pair2.first, to_string(predicted_rating), pair2.second});
@@ -34,28 +34,30 @@ int main() {
     cout << "\tRMSE = "<<RMSE(random_predictions)<<"\n";
 
 
-    ContentKNN knn(testAndTrain ->loocv_train_set, 5, data);
+    ContentKNN knn_loocv(testAndTrain ->loocv_train_set, 5, data);
     unordered_map<string,vector<Prediction>> *topN_per_user;
-    for (auto const & pair1 : *(testAndTrain->complete_dataset->user_to_item_rating)) {
+    for (auto const & pair1 : *(testAndTrain->loocv_test_set->user_product_rating)) {
         priority_queue<Prediction, vector<Prediction>, Compare_Predictions> topN;
         for (string product : *testAndTrain->loocv_test_set->products) {
-            double rating = knn.estimate_rating(pair1.first, product);
+            double rating = knn_loocv.estimate_rating(pair1.first, product, true);
+            cout << "Predicted Rating = " << rating << "\n";
             if (topN.size() < N) {
-                topN.push(Prediction{pair1.first, product, to_string(rating),  (*pair1.second)[product]});
+                topN.push(Prediction{pair1.first, product, to_string(rating), (*pair1.second)[product]});
             } else {
-                Prediction topPred = topN.top;
+                Prediction topPred = topN.top();
                 if (stod(topPred.estimated_rating) < rating) {
-                    topN.pop;
-                    topN.push(Prediction{pair1.first, product, to_string(rating),  (*pair1.second)[product]});
+                    topN.pop();
+                    topN.push(Prediction{pair1.first, product, to_string(rating), (*pair1.second)[product]});
                 }
             }
         }
         while (topN.size() != 0) {
-            Prediction currPred = topN.top;
-            topN.pop;
+            Prediction currPred = topN.top();
+            topN.pop();
             (*topN_per_user)[pair1.first].push_back(currPred);
         }
     }
+
 
     vector<Prediction> leftOutPredictions;
     for (auto const & pair : *testAndTrain->loocv_test_set->user_product_rating) {

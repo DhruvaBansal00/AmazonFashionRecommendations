@@ -57,6 +57,16 @@ int main() {
         }
     }
 
+    vector<Prediction> leftOutPredictions;
+    for (auto const & pair : *testAndTrain->loocv_test_set->user_product_rating) {
+        for (auto const & pair2 : *pair.second) {
+            leftOutPredictions.push_back(Prediction{pair.first, pair2.first, 0, pair2.second});
+        }
+    }
+    cout << "\tHit Rate = " << hitRate(topN_per_user, leftOutPredictions, N);
+
+
+
     delete testAndTrain;
     delete data;
     return 0;

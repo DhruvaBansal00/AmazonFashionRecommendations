@@ -40,12 +40,12 @@ double RMSE(vector<Prediction> predictions) {
 //     }
 // }
 
-double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int topN) {
+double hitRate(unordered_map<string,vector<Prediction>*> *topN_per_user, vector<Prediction> left_out_predictions, int topN) {
     uint hits = 0;
     uint total = 0;
     for (Prediction p : left_out_predictions) {
         int rank = 0;
-        for (Prediction n : (*topN_per_user)[p.user_id]) {
+        for (Prediction n : *(*topN_per_user)[p.user_id]) {
             if (n.product_id.compare(p.product_id) == 0) {
                 if (rank < topN) {
                     hits++;
@@ -58,13 +58,13 @@ double hitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<P
     return double(hits)/total;
 }
 
-double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions, int ratingCutoff, int topN) {
+double cummlativeHitRate(unordered_map<string,vector<Prediction>*> *topN_per_user, vector<Prediction> left_out_predictions, int ratingCutoff, int topN) {
     uint hits = 0;
     uint total = 0;
     for (Prediction p : left_out_predictions) {
         if (stoi(p.actual_rating) >= ratingCutoff) {
             int rank = 0;
-            for (Prediction n : (*topN_per_user)[p.user_id]) {
+            for (Prediction n : *(*topN_per_user)[p.user_id]) {
                 if (n.product_id.compare(p.product_id) == 0) {
                     if (rank < topN) {
                         hits++;
@@ -78,11 +78,11 @@ double cummlativeHitRate(unordered_map<string,vector<Prediction>> *topN_per_user
     return double(hits)/total;
 }
 
-void ratingHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions) {
+void ratingHitRate(unordered_map<string,vector<Prediction>*> *topN_per_user, vector<Prediction> left_out_predictions) {
     unordered_map<string, int> hits;
     unordered_map<string, int> total;
     for (Prediction p : left_out_predictions) {
-        for (Prediction q : (*topN_per_user)[p.user_id]) {
+        for (Prediction q : *(*topN_per_user)[p.user_id]) {
             if (q.product_id.compare(p.product_id) == 0) {
                 hits[p.actual_rating]++;
             }
@@ -94,13 +94,13 @@ void ratingHitRate(unordered_map<string,vector<Prediction>> *topN_per_user, vect
     }
 }
 
-double averageReciprocalHitRank(unordered_map<string,vector<Prediction>> *topN_per_user, vector<Prediction> left_out_predictions) {
+double averageReciprocalHitRank(unordered_map<string,vector<Prediction>*> *topN_per_user, vector<Prediction> left_out_predictions) {
     uint hits = 0;
     uint total = 0;
     double summation = 0;
     for (Prediction p : left_out_predictions) {
         int rank = 1;
-        for (Prediction n : (*topN_per_user)[p.user_id]) {
+        for (Prediction n : *(*topN_per_user)[p.user_id]) {
             if (n.product_id.compare(p.product_id) == 0) {
                 summation += 1.0/rank;
             }
@@ -111,11 +111,11 @@ double averageReciprocalHitRank(unordered_map<string,vector<Prediction>> *topN_p
     return summation/total;
 }
 
-double userCoverage(unordered_map<string,vector<Prediction>> *topN_per_user, int numUsers, int ratingCutoff) {
+double userCoverage(unordered_map<string,vector<Prediction>*> *topN_per_user, int numUsers, int ratingCutoff) {
     int hits = 0;
 
     for (auto const & pair : (*topN_per_user)) {
-        for (Prediction p : pair.second) {
+        for (Prediction p : *pair.second) {
             if (stoi(p.estimated_rating) >= ratingCutoff) {
                 hits++;
             }
@@ -125,11 +125,11 @@ double userCoverage(unordered_map<string,vector<Prediction>> *topN_per_user, int
     return double(hits)/numUsers;
 }
 
-double novelty(unordered_map<string,vector<Prediction>> *topN_per_user, ReadData *dataset) {
+double novelty(unordered_map<string,vector<Prediction>*> *topN_per_user, ReadData *dataset) {
     int n = 0;
     int total = 0;
     for (auto const & pair : (*topN_per_user)) {
-        for (Prediction p : pair.second) {
+        for (Prediction p : *pair.second) {
             total += (*(*dataset).id_to_category_rank)[p.user_id];
             n++;
         }

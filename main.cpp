@@ -3,6 +3,7 @@
 #include <queue>
 #define N 5
 
+
 typedef struct {
     bool operator()(Prediction p1, Prediction p2) 
     { 
@@ -34,38 +35,46 @@ int main() {
     cout << "\tRMSE = "<<RMSE(random_predictions)<<"\n";
 
 
-    ContentKNN knn_loocv(testAndTrain ->loocv_train_set, 5, data);
-    unordered_map<string,vector<Prediction>> *topN_per_user;
-    for (auto const & pair1 : *(testAndTrain->loocv_test_set->user_product_rating)) {
-        priority_queue<Prediction, vector<Prediction>, Compare_Predictions> topN;
-        for (string product : *testAndTrain->loocv_test_set->products) {
-            double rating = knn_loocv.estimate_rating(pair1.first, product, true);
-            cout << "Predicted Rating = " << rating << "\n";
-            if (topN.size() < N) {
-                topN.push(Prediction{pair1.first, product, to_string(rating), (*pair1.second)[product]});
-            } else {
-                Prediction topPred = topN.top();
-                if (stod(topPred.estimated_rating) < rating) {
-                    topN.pop();
+    bool calc_hitrate = false;
+
+    if (calc_hitrate) {
+        ContentKNN knn_loocv(testAndTrain ->loocv_train_set, 5, data);
+        unordered_map<string,vector<Prediction>*> *topN_per_user = new unordered_map<string,vector<Prediction>*>;
+        int totalUsers = testAndTrain->loocv_test_set->user_product_rating->size();
+        int currUsers = 0;
+        for (auto const & pair1 : *(testAndTrain->loocv_test_set->user_product_rating)) {
+            priority_queue<Prediction, vector<Prediction>, Compare_Predictions> topN;
+            for (string product : *testAndTrain->loocv_test_set->products) {
+                double rating = knn_loocv.estimate_rating(pair1.first, product, false);
+                if (topN.size() < N) {
                     topN.push(Prediction{pair1.first, product, to_string(rating), (*pair1.second)[product]});
+                } else {
+                    Prediction topPred = topN.top();
+                    if (stod(topPred.estimated_rating) < rating) {
+                        topN.pop();
+                        topN.push(Prediction{pair1.first, product, to_string(rating), (*pair1.second)[product]});
+                    }
                 }
             }
+            (*topN_per_user)[pair1.first] = new vector<Prediction>;
+            while (topN.size() != 0) {
+                Prediction currPred = topN.top();
+                topN.pop();
+                (*topN_per_user)[pair1.first]->push_back(currPred);
+            }
+            currUsers++;
+            cout << "Users done: " << currUsers << "/" << totalUsers<<"\n";
         }
-        while (topN.size() != 0) {
-            Prediction currPred = topN.top();
-            topN.pop();
-            (*topN_per_user)[pair1.first].push_back(currPred);
-        }
-    }
 
 
-    vector<Prediction> leftOutPredictions;
-    for (auto const & pair : *testAndTrain->loocv_test_set->user_product_rating) {
-        for (auto const & pair2 : *pair.second) {
-            leftOutPredictions.push_back(Prediction{pair.first, pair2.first, 0, pair2.second});
+        vector<Prediction> leftOutPredictions;
+        for (auto const & pair : *testAndTrain->loocv_test_set->user_product_rating) {
+            for (auto const & pair2 : *pair.second) {
+                leftOutPredictions.push_back(Prediction{pair.first, pair2.first, 0, pair2.second});
+            }
         }
+        cout << "\tHit Rate = " << hitRate(topN_per_user, leftOutPredictions, N);
     }
-    cout << "\tHit Rate = " << hitRate(topN_per_user, leftOutPredictions, N);
 
 
 

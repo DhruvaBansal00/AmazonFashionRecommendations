@@ -33,7 +33,7 @@ void SplitDataset::split_test_train(ReadData* data, double testProp) {
     srand(time(0));
     for (auto const & pair1 : *(*data).user_to_item_rating) {
         bool first = true;
-        if ((*pair1.second).size() >= 5) { //Filtering out users with less than 5 ratings
+        if ((*pair1.second).size() >= 10) { //Filtering out users with less than 5 ratings
             for (auto const & pair2 : *pair1.second) {
                 if (first) {
                     add(pair1.first, pair2.first, pair2.second, loocv_test_set);

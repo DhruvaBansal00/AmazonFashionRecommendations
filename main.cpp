@@ -35,7 +35,7 @@ int main() {
     cout << "\tRMSE = "<<RMSE(random_predictions)<<"\n";
 
 
-    bool calc_hitrate = false;
+    bool calc_hitrate = true;
 
     if (calc_hitrate) {
         ContentKNN knn_loocv(testAndTrain ->loocv_train_set, 5, data);
@@ -70,10 +70,10 @@ int main() {
         vector<Prediction> leftOutPredictions;
         for (auto const & pair : *testAndTrain->loocv_test_set->user_product_rating) {
             for (auto const & pair2 : *pair.second) {
-                leftOutPredictions.push_back(Prediction{pair.first, pair2.first, 0, pair2.second});
+                leftOutPredictions.push_back(Prediction{pair.first, pair2.first, "", pair2.second});
             }
         }
-        cout << "\tHit Rate = " << hitRate(topN_per_user, leftOutPredictions, N);
+        cout << "\tHit Rate = " << hitRate(topN_per_user, leftOutPredictions, N) << "\n";
     }
 
 
